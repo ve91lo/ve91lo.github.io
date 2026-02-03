@@ -1,2 +1,2 @@
-# ve91lo.github.io
+# EduHK INT4060-03E
 advanced logic simulator
