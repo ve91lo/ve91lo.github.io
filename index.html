@@ -3,622 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Junior Computer Science Lab</title>
+    <title>CS Discovery: Data Representation</title>
     <style>
         :root {
             --primary: #2563eb;
             --secondary: #475569;
             --bg: #f8fafc;
-            --card: #ffffff;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --accent: #f59e0b;
+            --card-bg: #ffffff;
+            --on-color: #22c55e;
+            --off-color: #ef4444;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg);
+            color: var(--secondary);
             margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            color: #1e293b;
+            align-items: center;
         }
 
-        /* Navigation */
-        nav {
-            background-color: #1e293b;
-            padding: 1rem;
-            display: flex;
-            gap: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+        h1 { color: var(--primary); margin-bottom: 10px; }
+        p { line-height: 1.6; }
 
-        nav button {
-            background: transparent;
-            border: 1px solid #64748b;
-            color: #e2e8f0;
-            padding: 0.5rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        nav button.active {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        /* Main Content Area */
-        main {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            max-width: 1000px;
-            margin: 0 auto;
+        .container {
+            max-width: 800px;
             width: 100%;
         }
 
-        .section {
-            display: none;
-            animation: fadeIn 0.3s ease-in;
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            padding: 5px;
+            gap: 5px;
         }
 
-        .section.active {
-            display: block;
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--secondary);
+            border-radius: 6px;
+            transition: 0.3s;
         }
+
+        .tab-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Content Sections */
+        .module {
+            display: none;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .module.active { display: block; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 { margin-bottom: 0.5rem; }
-        p.subtitle { color: var(--secondary); margin-bottom: 2rem; }
-
-        /* --- Simulator 1: Binary Explorer Styles --- */
-        .bit-container {
+        /* Interactive Elements */
+        .switch-container {
             display: flex;
-            gap: 10px;
             justify-content: center;
-            margin-bottom: 2rem;
+            gap: 15px;
+            margin: 30px 0;
             flex-wrap: wrap;
         }
 
-        .bit-switch {
+        .bit-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            cursor: pointer;
+            gap: 10px;
         }
 
-        .bit-box {
+        .switch {
             width: 60px;
-            height: 80px;
-            background-color: #e2e8f0;
-            border: 3px solid #cbd5e1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #94a3b8;
-            transition: all 0.2s;
-        }
-
-        .bit-switch.on .bit-box {
-            background-color: var(--primary);
-            border-color: #1d4ed8;
-            color: white;
-            box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
-        }
-
-        .bit-value { margin-top: 5px; font-weight: bold; color: var(--secondary); }
-
-        .result-display {
-            background: var(--card);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            text-align: center;
-        }
-
-        .result-box h3 { margin: 0; color: var(--secondary); font-size: 0.9rem; text-transform: uppercase; }
-        .result-box div { font-size: 2.5rem; font-weight: bold; color: #1e293b; }
-
-        /* --- Simulator 2: Logic Gate Styles --- */
-        .gate-playground {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card);
-            padding: 3rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .inputs, .outputs { display: flex; flex-direction: column; gap: 2rem; }
-        
-        .toggle-btn {
-            width: 80px;
-            height: 40px;
-            background: #cbd5e1;
-            border-radius: 20px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        .toggle-btn::after {
-            content: '';
-            position: absolute;
-            top: 4px; left: 4px;
-            width: 32px; height: 32px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .toggle-btn.active { background: var(--success); }
-        .toggle-btn.active::after { left: 44px; }
-
-        .gate-selector {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .gate-shape {
-            width: 120px;
             height: 100px;
-            background: #1e293b;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            border-radius: 8px; /* Default shape */
+            background: #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
             position: relative;
+            transition: 0.3s;
+            border: 2px solid #94a3b8;
         }
-        
-        /* Specific gate shapes via CSS radius */
-        .gate-shape.AND { border-radius: 10px 50px 50px 10px; }
-        .gate-shape.OR { border-radius: 10px 100% 100% 10px; }
-        .gate-shape.NOT { border-radius: 5px 50px 50px 5px; clip-path: polygon(0% 0%, 100% 50%, 0% 100%); width: 100px; }
 
-        .wire { height: 4px; background: #cbd5e1; flex: 1; margin: 0 10px; transition: 0.3s; }
-        .wire.hot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .switch.on {
+            background: var(--on-color);
+            box-shadow: 0 0 15px var(--on-color);
+            border-color: #16a34a;
+        }
+
+        .switch::after {
+            content: '0';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .switch.on::after { content: '1'; }
 
         .bulb {
-            width: 60px; height: 60px;
-            background: #cbd5e1;
-            border-radius: 50%;
-            border: 4px solid #94a3b8;
+            font-size: 3rem;
+            filter: grayscale(100%);
             transition: 0.3s;
         }
-        .bulb.lit { background: var(--accent); border-color: #d97706; box-shadow: 0 0 30px var(--accent); }
+        .bulb.lit { filter: grayscale(0%); text-shadow: 0 0 20px yellow; }
 
-        /* --- Simulator 3: CPU Visualizer Styles --- */
-        .cpu-layout {
-            display: grid;
-            grid-template-columns: 200px 1fr 200px;
-            gap: 2rem;
-            align-items: start;
+        .value-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
-        .memory-bank, .cpu-core {
-            background: var(--card);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .cpu-core { border-color: var(--primary); position: relative; }
-        .cpu-core::before {
-            content: "CPU"; position: absolute; top: -12px; left: 10px; 
-            background: var(--primary); color: white; padding: 0 8px; font-size: 0.8rem; border-radius: 4px;
-        }
-
-        .mem-slot {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-            font-family: monospace;
-            display: flex;
-            justify-content: space-between;
-        }
-        .mem-slot.active { background-color: #fef3c7; border-left: 4px solid var(--accent); }
-
-        .register {
-            margin-bottom: 1rem;
-            background: #f1f5f9;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .register label { font-size: 0.8rem; color: var(--secondary); display: block; }
-        .register .val { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-
-        .alu-box {
-            background: #1e293b;
-            color: white;
+        /* Binary Counter specific */
+        .binary-readout {
+            font-size: 2rem;
             text-align: center;
-            padding: 1rem;
-            border-radius: 4px;
-            margin-top: 1rem;
+            margin: 20px 0;
+            font-family: monospace;
+            background: #1e293b;
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
         }
 
-        .control-panel {
-            grid-column: 1 / -1;
-            background: #fff;
-            padding: 1rem;
-            border-top: 1px solid #e2e8f0;
+        /* ASCII Decoder */
+        .decoder-area {
             display: flex;
-            gap: 1rem;
-            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .decode-card {
+            flex: 1;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 250px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
         }
 
-        .phase-indicator {
-            display: flex;
-            gap: 5px;
+        /* Pixel Grid */
+        .pixel-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            width: 300px;
+            margin: 0 auto;
+            background: #ccc;
+            border: 5px solid #333;
         }
-        .phase {
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: #e2e8f0;
-            font-size: 0.8rem;
-            color: #64748b;
+        .pixel {
+            aspect-ratio: 1;
+            background: white;
+            cursor: pointer;
+            transition: 0.1s;
         }
-        .phase.current { background: var(--primary); color: white; }
+        .pixel.black { background: black; }
+        .pixel-code {
+            font-family: monospace;
+            background: #eee;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            word-break: break-all;
+        }
 
     </style>
 </head>
 <body>
 
-    <nav>
-        <button onclick="showSection('binary')" class="active" id="btn-binary">1. Binary Lab</button>
-        <button onclick="showSection('logic')" id="btn-logic">2. Logic Gates</button>
-        <button onclick="showSection('cpu')" id="btn-cpu">3. The CPU Cycle</button>
-    </nav>
+    <div class="container">
+        <h1>Computer Organization: Level 1</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab1')">1. The Switch (Bit)</button>
+            <button class="tab-btn" onclick="switchTab('tab2')">2. The Byte</button>
+            <button class="tab-btn" onclick="switchTab('tab3')">3. Text (ASCII)</button>
+            <button class="tab-btn" onclick="switchTab('tab4')">4. Images (Pixels)</button>
+        </div>
 
-    <main>
-        <div id="binary" class="section active">
-            <h1>The Language of Computers</h1>
-            <p class="subtitle">Click the switches to flip bits between 0 and 1. Watch how the values change.</p>
+        <div id="tab1" class="module active">
+            <h2>The Bit: The Atom of Information</h2>
+            <p>Computers run on electricity. Wires can either have electricity flowing (<strong>ON</strong>) or not (<strong>OFF</strong>). We call this a "Bit".</p>
+            <p><strong>Try it:</strong> Click the switch below to turn the electricity on and off.</p>
             
-            <div class="bit-container" id="bitSwitches">
-                </div>
-
-            <div class="result-display">
-                <div class="result-box">
-                    <h3>Decimal (Human)</h3>
-                    <div id="decOutput">0</div>
-                </div>
-                <div class="result-box">
-                    <h3>ASCII (Text)</h3>
-                    <div id="asciiOutput" style="color: var(--primary)">.</div>
-                </div>
-                <div class="result-box">
-                    <h3>Hexadecimal</h3>
-                    <div id="hexOutput">00</div>
+            <div class="switch-container">
+                <div class="bit-wrapper">
+                    <div id="singleBulb" class="bulb">💡</div>
+                    <div class="switch" onclick="toggleSingleBit(this)"></div>
+                    <div class="value-display">State: <span id="singleState">OFF (0)</span></div>
                 </div>
             </div>
+        </div>
+
+        <div id="tab2" class="module">
+            <h2>The Byte: Counting with Electricity</h2>
+            <p>A single bit can only count to 1. But if we chain <strong>8 switches</strong> together, we get a <strong>Byte</strong>. This allows us to represent much larger numbers.</p>
+            <p><strong>Activity:</strong> Flip the switches to see how the computer adds up the numbers. Try to make the number <strong>255</strong> (the maximum for a byte)!</p>
+
+            <div class="binary-readout">
+                Value: <span id="byteDecimal">0</span>
+            </div>
+
+            <div class="switch-container" id="byteContainer">
+                </div>
             
-            <div style="margin-top: 2rem; padding: 1rem; background: #fffbe6; border-radius: 8px;">
-                <strong>Challenge:</strong> Can you make the decimal number <strong>65</strong>? (Hint: That is the code for the letter 'A')
-            </div>
+            <p style="text-align: center; font-size: 0.9rem; color: #64748b;">Notice how the number on the right (1) doubles as you move left (1, 2, 4, 8...)? That's base-2 math!</p>
         </div>
 
-        <div id="logic" class="section">
-            <h1>How Computers Think</h1>
-            <p class="subtitle">Select a gate type and toggle the inputs to see if the bulb lights up.</p>
+        <div id="tab3" class="module">
+            <h2>Text: The Secret Code (ASCII)</h2>
+            <p>Computers don't understand letters like "A" or "B". They only understand numbers. To solve this, humans agreed on a "secret code" called <strong>ASCII</strong>.</p>
+            <p><strong>Activity:</strong> Type a secret message below to see how a computer sees it.</p>
 
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <label for="gateType">Select Logic Gate: </label>
-                <select id="gateType" onchange="updateLogic()" style="padding: 8px; font-size: 1rem;">
-                    <option value="AND">AND (Both must be ON)</option>
-                    <option value="OR">OR (Either can be ON)</option>
-                    <option value="NOT">NOT (Inverts the signal)</option>
-                </select>
-            </div>
-
-            <div class="gate-playground">
-                <div class="inputs">
-                    <div style="text-align: center;">
-                        <span>Input A</span>
-                        <div class="toggle-btn" id="btnA" onclick="toggleLogic('A')"></div>
-                    </div>
-                    <div style="text-align: center;" id="inputBContainer">
-                        <span>Input B</span>
-                        <div class="toggle-btn" id="btnB" onclick="toggleLogic('B')"></div>
+            <div class="decoder-area">
+                <div class="decode-card">
+                    <h3>Human Language</h3>
+                    <input type="text" id="humanInput" placeholder="Type here..." oninput="encodeText()" maxlength="10">
+                </div>
+                <div class="decode-card">
+                    <h3>Computer Language (Binary)</h3>
+                    <div id="binaryOutput" style="font-family: monospace; margin-top: 15px; color: var(--primary); font-weight: bold;">
+                        00000000
                     </div>
                 </div>
+            </div>
+            <p style="margin-top:20px;">Did you know? Capital 'A' is number 65 (01000001), but lowercase 'a' is 97 (01100001)!</p>
+        </div>
 
-                <div class="wire" id="wire1"></div>
+        <div id="tab4" class="module">
+            <h2>Images: Grid of Numbers</h2>
+            <p>An image is just a grid of dots called <strong>Pixels</strong>. In a black-and-white image, 0 is white and 1 is black.</p>
+            <p><strong>Activity:</strong> Click the squares to draw a picture. Watch the binary code update instantly.</p>
+
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="pixel-grid" id="pixelGrid">
+                    </div>
                 
-                <div class="gate-selector">
-                    <div class="gate-shape AND" id="visualGate">AND</div>
+                <div class="pixel-code">
+                    <strong>Computer Memory:</strong><br>
+                    <span id="pixelBinary">00000000...</span>
                 </div>
-
-                <div class="wire" id="wireOut"></div>
-
-                <div class="outputs">
-                    <div style="text-align: center;">
-                        <span>Output</span>
-                        <div class="bulb" id="outputBulb"></div>
-                    </div>
-                </div>
+                <button onclick="clearGrid()" style="margin-top: 10px; padding: 8px 16px; cursor: pointer;">Clear Grid</button>
             </div>
         </div>
-
-        <div id="cpu" class="section">
-            <h1>The Fetch-Decode-Execute Cycle</h1>
-            <p class="subtitle">Step through the program to see how the CPU processes instructions.</p>
-
-            <div class="cpu-layout">
-                <div class="memory-bank">
-                    <h3 style="margin-top:0">RAM (Memory)</h3>
-                    <div id="ramDisplay"></div>
-                </div>
-
-                <div class="cpu-core">
-                    <div class="register">
-                        <label>Program Counter (PC)</label>
-                        <div class="val" id="regPC">0</div>
-                    </div>
-                    <div class="register">
-                        <label>Instruction Register (IR)</label>
-                        <div class="val" id="regIR" style="font-size: 1rem">---</div>
-                    </div>
-                    
-                    <div class="alu-box">
-                        <div style="font-size: 0.8rem; margin-bottom: 5px; opacity: 0.8">ALU (Math Unit)</div>
-                        <div class="register" style="background: rgba(255,255,255,0.1); color: white;">
-                            <label style="color: #cbd5e1">Accumulator (ACC)</label>
-                            <div class="val" id="regACC" style="color: white">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: white; padding: 1rem; border-radius: 8px; font-size: 0.9rem;">
-                    <h3>Status Log</h3>
-                    <div id="cpuLog" style="color: var(--secondary)">System Ready.</div>
-                </div>
-            </div>
-
-            <div class="control-panel">
-                <button onclick="stepCPU()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">STEP ➔</button>
-                <button onclick="resetCPU()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 4px; cursor: pointer;">RESET</button>
-                
-                <div class="phase-indicator">
-                    <div class="phase" id="phaseFetch">FETCH</div>
-                    <div class="phase" id="phaseDecode">DECODE</div>
-                    <div class="phase" id="phaseExecute">EXECUTE</div>
-                </div>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <script>
         // --- NAVIGATION ---
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
-            document.getElementById('btn-'+id).classList.add('active');
+        function switchTab(tabId) {
+            document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        // --- SIM 1: BINARY ---
-        const bits = [128, 64, 32, 16, 8, 4, 2, 1];
-        let bitState = [0,0,0,0,0,0,0,0];
+        // --- MODULE 1: SINGLE BIT ---
+        function toggleSingleBit(el) {
+            el.classList.toggle('on');
+            const isOn = el.classList.contains('on');
+            document.getElementById('singleBulb').classList.toggle('lit', isOn);
+            document.getElementById('singleState').innerText = isOn ? "ON (1)" : "OFF (0)";
+        }
 
-        function initBinary() {
-            const container = document.getElementById('bitSwitches');
-            container.innerHTML = '';
-            bits.forEach((val, idx) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'bit-switch';
-                wrapper.onclick = () => toggleBit(idx);
-                wrapper.innerHTML = `
-                    <div class="bit-box" id="bitbox-${idx}">0</div>
-                    <div class="bit-value">${val}</div>
-                `;
-                container.appendChild(wrapper);
+        // --- MODULE 2: THE BYTE ---
+        const byteContainer = document.getElementById('byteContainer');
+        // Create 8 switches
+        for (let i = 7; i >= 0; i--) {
+            const val = Math.pow(2, i);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'bit-wrapper';
+            wrapper.innerHTML = `
+                <div class="value-display" style="font-size: 0.9rem">${val}</div>
+                <div class="switch byte-switch" data-val="${val}" onclick="toggleByteBit(this)"></div>
+            `;
+            byteContainer.appendChild(wrapper);
+        }
+
+        function toggleByteBit(el) {
+            el.classList.toggle('on');
+            calculateByte();
+        }
+
+        function calculateByte() {
+            let total = 0;
+            document.querySelectorAll('.byte-switch').forEach(sw => {
+                if (sw.classList.contains('on')) {
+                    total += parseInt(sw.getAttribute('data-val'));
+                }
             });
+            document.getElementById('byteDecimal').innerText = total;
         }
 
-        function toggleBit(idx) {
-            bitState[idx] = bitState[idx] ? 0 : 1;
-            const el = document.getElementById(`bitbox-${idx}`).parentElement;
-            if(bitState[idx]) {
-                el.classList.add('on');
-                document.getElementById(`bitbox-${idx}`).innerText = '1';
-            } else {
-                el.classList.remove('on');
-                document.getElementById(`bitbox-${idx}`).innerText = '0';
+        // --- MODULE 3: TEXT ---
+        function encodeText() {
+            const input = document.getElementById('humanInput').value;
+            let output = "";
+            for (let i = 0; i < input.length; i++) {
+                // Get ASCII code and convert to binary
+                let bin = input[i].charCodeAt(0).toString(2);
+                // Pad with leading zeros to make it 8 bits
+                while (bin.length < 8) bin = "0" + bin;
+                output += bin + " ";
             }
-            calculateBinary();
+            document.getElementById('binaryOutput').innerText = output || "00000000";
         }
 
-        function calculateBinary() {
-            let decimal = 0;
-            bitState.forEach((state, idx) => {
-                if(state) decimal += bits[idx];
+        // --- MODULE 4: IMAGES ---
+        const pixelGrid = document.getElementById('pixelGrid');
+        const totalPixels = 64; // 8x8
+
+        for (let i = 0; i < totalPixels; i++) {
+            const pix = document.createElement('div');
+            pix.className = 'pixel';
+            pix.onclick = function() {
+                this.classList.toggle('black');
+                updatePixelBinary();
+            };
+            pixelGrid.appendChild(pix);
+        }
+
+        function updatePixelBinary() {
+            let binaryString = "";
+            document.querySelectorAll('.pixel').forEach((p, index) => {
+                binaryString += p.classList.contains('black') ? "1" : "0";
+                if ((index + 1) % 8 === 0) binaryString += " "; // Space every row for readability
             });
-            
-            document.getElementById('decOutput').innerText = decimal;
-            document.getElementById('hexOutput').innerText = decimal.toString(16).toUpperCase().padStart(2, '0');
-            
-            // ASCII Logic
-            let char = '.';
-            if(decimal > 32 && decimal < 127) char = String.fromCharCode(decimal);
-            document.getElementById('asciiOutput').innerText = char;
+            document.getElementById('pixelBinary').innerText = binaryString;
         }
 
-        // --- SIM 2: LOGIC GATES ---
-        let logicState = { a: false, b: false };
-
-        function toggleLogic(inp) {
-            if(inp === 'A') {
-                logicState.a = !logicState.a;
-                document.getElementById('btnA').classList.toggle('active');
-            } else {
-                logicState.b = !logicState.b;
-                document.getElementById('btnB').classList.toggle('active');
-            }
-            updateLogic();
+        function clearGrid() {
+            document.querySelectorAll('.pixel').forEach(p => p.classList.remove('black'));
+            updatePixelBinary();
         }
-
-        function updateLogic() {
-            const type = document.getElementById('gateType').value;
-            const visualGate = document.getElementById('visualGate');
-            const inputBContainer = document.getElementById('inputBContainer');
-            
-            // Update Visual Shape
-            visualGate.className = `gate-shape ${type}`;
-            visualGate.innerText = type;
-
-            // Handle NOT gate (only 1 input)
-            if(type === 'NOT') {
-                inputBContainer.style.opacity = '0.2';
-                inputBContainer.style.pointerEvents = 'none';
-            } else {
-                inputBContainer.style.opacity = '1';
-                inputBContainer.style.pointerEvents = 'all';
-            }
-
-            // Calculate Logic
-            let result = false;
-            if(type === 'AND') result = logicState.a && logicState.b;
-            if(type === 'OR') result = logicState.a || logicState.b;
-            if(type === 'NOT') result = !logicState.a;
-
-            // Visual Feedback
-            const wireOut = document.getElementById('wireOut');
-            const bulb = document.getElementById('outputBulb');
-            
-            if(result) {
-                wireOut.classList.add('hot');
-                bulb.classList.add('lit');
-            } else {
-                wireOut.classList.remove('hot');
-                bulb.classList.remove('lit');
-            }
-        }
-
-        // --- SIM 3: CPU CYCLE ---
-        // A simple instruction set: LDA (Load), ADD, SUB, OUT
-        const program = [
-            { op: 'LDA', val: 10 }, // Load 10 into Accumulator
-            { op: 'ADD', val: 5 },  // Add 5
-            { op: 'SUB', val: 2 },  // Subtract 2
-            { op: 'HLT', val: 0 }   // Stop
-        ];
-        
-        let pc = 0;
-        let acc = 0;
-        let ir = { op: '---', val: 0 };
-        let phase = 0; // 0=Fetch, 1=Decode, 2=Execute
-        let halted = false;
-
-        function initCPU() {
-            renderRAM();
-            updateCPUDisplay();
-        }
-
-        function renderRAM() {
-            const ramEl = document.getElementById('ramDisplay');
-            ramEl.innerHTML = '';
-            program.forEach((inst, idx) => {
-                const slot = document.createElement('div');
-                slot.className = `mem-slot ${idx === pc ? 'active' : ''}`;
-                slot.id = `ram-${idx}`;
-                slot.innerHTML = `<span>${idx}:</span> <strong>${inst.op} ${inst.val}</strong>`;
-                ramEl.appendChild(slot);
-            });
-        }
-
-        function updateCPUDisplay() {
-            document.getElementById('regPC').innerText = pc;
-            document.getElementById('regACC').innerText = acc;
-            document.getElementById('regIR').innerText = `${ir.op} ${ir.val}`;
-            
-            // Highlight current phase
-            document.querySelectorAll('.phase').forEach(el => el.classList.remove('current'));
-            if(phase === 0) document.getElementById('phaseFetch').classList.add('current');
-            if(phase === 1) document.getElementById('phaseDecode').classList.add('current');
-            if(phase === 2) document.getElementById('phaseExecute').classList.add('current');
-            
-            // Highlight RAM row
-            document.querySelectorAll('.mem-slot').forEach(el => el.classList.remove('active'));
-            if(!halted && document.getElementById(`ram-${pc}`)) {
-                document.getElementById(`ram-${pc}`).classList.add('active');
-            }
-        }
-
-        function stepCPU() {
-            if(halted) return;
-            const log = document.getElementById('cpuLog');
-
-            if(phase === 0) { // FETCH
-                if(pc >= program.length) {
-                    halted = true;
-                    log.innerText = "End of Memory Reached.";
-                    return;
-                }
-                ir = program[pc];
-                log.innerText = `FETCH: Retrieved instruction "${ir.op} ${ir.val}" from RAM address ${pc}.`;
-                phase = 1;
-            } 
-            else if (phase === 1) { // DECODE
-                log.innerText = `DECODE: CPU identifies "${ir.op}" command. Preparing ALU.`;
-                phase = 2;
-            }
-            else if (phase === 2) { // EXECUTE
-                if(ir.op === 'LDA') {
-                    acc = ir.val;
-                    log.innerText = `EXECUTE: Loaded value ${ir.val} into Accumulator.`;
-                }
-                else if(ir.op === 'ADD') {
-                    acc += ir.val;
-                    log.innerText = `EXECUTE: Added ${ir.val} to Accumulator.`;
-                }
-                else if(ir.op === 'SUB') {
-                    acc -= ir.val;
-                    log.innerText = `EXECUTE: Subtracted ${ir.val} from Accumulator.`;
-                }
-                else if(ir.op === 'HLT') {
-                    halted = true;
-                    log.innerText = "EXECUTE: Halt command received. Program finished.";
-                }
-                
-                if(!halted) pc++;
-                phase = 0;
-            }
-            updateCPUDisplay();
-        }
-
-        function resetCPU() {
-            pc = 0;
-            acc = 0;
-            ir = { op: '---', val: 0 };
-            phase = 0;
-            halted = false;
-            document.getElementById('cpuLog').innerText = "System Reset.";
-            updateCPUDisplay();
-        }
-
-        // Initialize
-        initBinary();
-        initCPU();
-        calculateBinary(); // Initial calc
     </script>
 </body>
 </html>
