@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS Discovery: Data Representation</title>
+    <title>How to read computer's ‘monologue’...</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -12,6 +12,7 @@
             --card-bg: #ffffff;
             --on-color: #22c55e;
             --off-color: #ef4444;
+            --highlight: #f59e0b;
         }
 
         body {
@@ -26,10 +27,12 @@
         }
 
         h1 { color: var(--primary); margin-bottom: 10px; }
+        h2 { border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        h3 { font-size: 1.1rem; color: var(--secondary); margin-bottom: 5px; }
         p { line-height: 1.6; }
 
         .container {
-            max-width: 800px;
+            max-width: 850px;
             width: 100%;
         }
 
@@ -41,6 +44,7 @@
             border-radius: 8px;
             padding: 5px;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -53,6 +57,7 @@
             color: var(--secondary);
             border-radius: 6px;
             transition: 0.3s;
+            min-width: 120px;
         }
 
         .tab-btn.active {
@@ -78,11 +83,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Interactive Elements */
+        /* MODULE 1 & 2 STYLES (Switches) */
         .switch-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
             margin: 30px 0;
             flex-wrap: wrap;
         }
@@ -95,8 +100,8 @@
         }
 
         .switch {
-            width: 60px;
-            height: 100px;
+            width: 50px;
+            height: 90px;
             background: #cbd5e1;
             border-radius: 8px;
             cursor: pointer;
@@ -119,7 +124,7 @@
             transform: translateX(-50%);
             font-weight: bold;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
 
         .switch.on::after { content: '1'; }
@@ -131,13 +136,6 @@
         }
         .bulb.lit { filter: grayscale(0%); text-shadow: 0 0 20px yellow; }
 
-        .value-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        /* Binary Counter specific */
         .binary-readout {
             font-size: 2rem;
             text-align: center;
@@ -149,52 +147,146 @@
             border-radius: 8px;
         }
 
-        /* ASCII Decoder */
-        .decoder-area {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .decode-card {
-            flex: 1;
+        /* 32 vs 64 Bit Section */
+        .arch-container {
             background: #f1f5f9;
             padding: 20px;
             border-radius: 8px;
-            min-width: 250px;
+            margin-top: 20px;
+            border-left: 5px solid var(--highlight);
         }
-        input[type="text"] {
+        .arch-demo {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .arch-box {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            min-width: 200px;
+        }
+        .arch-bar {
+            height: 20px;
             width: 100%;
-            padding: 10px;
-            font-size: 1.2rem;
-            margin-top: 10px;
-            border: 2px solid #cbd5e1;
-            border-radius: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .arch-fill {
+            height: 100%;
+            background: var(--on-color);
+            width: 0%;
+            transition: 1s ease-out;
+        }
+        .arch-fill.crash { background: var(--off-color); }
+        .btn-test {
+            background: var(--primary); color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; font-size: 1rem; margin-top: 10px;
         }
 
-        /* Pixel Grid */
+        /* MODULE 3: ASCII STYLES */
+        .decoder-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .translation-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .translation-box {
+            flex: 1;
+            min-width: 250px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        /* The Image Placeholder */
+        .img-placeholder {
+            width: 100%;
+            height: 380px;
+            background-image: url('https://www.labelplanet.co.uk/_cache/og_faq_glossary/1200x630/ascii-395.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 3px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-weight: bold;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        /* Only for visualization in the simulator, you replace the content */
+        .img-placeholder p { margin: 0; }
+
+
+        /* MODULE 4: PIXEL STYLES */
+        .pixel-toolbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+        }
         .pixel-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 2px;
-            width: 300px;
+            gap: 1px;
+            width: 320px;
             margin: 0 auto;
-            background: #ccc;
+            background: #94a3b8;
             border: 5px solid #333;
         }
         .pixel {
             aspect-ratio: 1;
-            background: white;
+            background: #ffffff;
             cursor: pointer;
-            transition: 0.1s;
         }
-        .pixel.black { background: black; }
+        .pixel:hover {
+            opacity: 0.8;
+        }
         .pixel-code {
             font-family: monospace;
-            background: #eee;
-            padding: 10px;
+            background: #1e293b;
+            color: #fff;
+            padding: 15px;
             margin-top: 20px;
             border-radius: 5px;
             word-break: break-all;
+            font-size: 0.9rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        input[type="color"] {
+            border: none;
+            width: 50px;
+            height: 40px;
+            cursor: pointer;
+            background: transparent;
         }
 
     </style>
@@ -202,20 +294,18 @@
 <body>
 
     <div class="container">
-        <h1>Computer Organization: Level 1</h1>
+        <h1>How to read computer's ‘monologue’...</h1>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab1')">1. The Switch (Bit)</button>
-            <button class="tab-btn" onclick="switchTab('tab2')">2. The Byte</button>
+            <button class="tab-btn active" onclick="switchTab('tab1')">1. The Switch</button>
+            <button class="tab-btn" onclick="switchTab('tab2')">2. The Byte & 64-bit</button>
             <button class="tab-btn" onclick="switchTab('tab3')">3. Text (ASCII)</button>
-            <button class="tab-btn" onclick="switchTab('tab4')">4. Images (Pixels)</button>
+            <button class="tab-btn" onclick="switchTab('tab4')">4. Images (Color)</button>
         </div>
 
         <div id="tab1" class="module active">
             <h2>The Bit: The Atom of Information</h2>
             <p>Computers run on electricity. Wires can either have electricity flowing (<strong>ON</strong>) or not (<strong>OFF</strong>). We call this a "Bit".</p>
-            <p><strong>Try it:</strong> Click the switch below to turn the electricity on and off.</p>
-            
             <div class="switch-container">
                 <div class="bit-wrapper">
                     <div id="singleBulb" class="bulb">💡</div>
@@ -228,52 +318,83 @@
         <div id="tab2" class="module">
             <h2>The Byte: Counting with Electricity</h2>
             <p>A single bit can only count to 1. But if we chain <strong>8 switches</strong> together, we get a <strong>Byte</strong>. This allows us to represent much larger numbers.</p>
-            <p><strong>Activity:</strong> Flip the switches to see how the computer adds up the numbers. Try to make the number <strong>255</strong> (the maximum for a byte)!</p>
-
-            <div class="binary-readout">
-                Value: <span id="byteDecimal">0</span>
-            </div>
-
-            <div class="switch-container" id="byteContainer">
-                </div>
+            <div class="binary-readout">Value: <span id="byteDecimal">0</span></div>
+            <div class="switch-container" id="byteContainer"></div>
             
-            <p style="text-align: center; font-size: 0.9rem; color: #64748b;">Notice how the number on the right (1) doubles as you move left (1, 2, 4, 8...)? That's base-2 math!</p>
+            <div class="arch-container">
+                <h3>The 32-bit vs. 64-bit Limit</h3>
+                <p><strong>32-bit System:</strong> Can only count to 4 Billion (Max 4GB RAM).<br>
+                <strong>64-bit System:</strong> Can count to 18 Quintillion (Unlimited RAM).</p>
+                <div class="arch-demo">
+                    <div class="arch-box">
+                        <h4>32-Bit</h4>
+                        <div class="arch-bar"><div id="bar32" class="arch-fill"></div></div>
+                        <div id="status32" style="font-weight: bold; color: #64748b;">Ready</div>
+                    </div>
+                    <div class="arch-box">
+                        <h4>64-Bit</h4>
+                        <div class="arch-bar"><div id="bar64" class="arch-fill"></div></div>
+                        <div id="status64" style="font-weight: bold; color: #64748b;">Ready</div>
+                    </div>
+                </div>
+                <div style="text-align: center;"><button class="btn-test" onclick="runSimulation()">Launch 8GB Game</button></div>
+            </div>
         </div>
 
         <div id="tab3" class="module">
             <h2>Text: The Secret Code (ASCII)</h2>
-            <p>Computers don't understand letters like "A" or "B". They only understand numbers. To solve this, humans agreed on a "secret code" called <strong>ASCII</strong>.</p>
-            <p><strong>Activity:</strong> Type a secret message below to see how a computer sees it.</p>
-
+            <p>Computers map every letter to a number using a system called <strong>ASCII</strong>.</p>
+            
             <div class="decoder-area">
-                <div class="decode-card">
-                    <h3>Human Language</h3>
-                    <input type="text" id="humanInput" placeholder="Type here..." oninput="encodeText()" maxlength="10">
+                <div class="translation-row">
+                    <div class="translation-box">
+                        <h3>Human Language (Input)</h3>
+                        <input type="text" id="humanInput" placeholder="Type text here..." oninput="encodeText()" maxlength="15">
+                    </div>
+                    <div class="translation-box">
+                        <h3>Computer Language (Output)</h3>
+                        <div id="binaryOutput" style="font-family: monospace; color: var(--primary); font-weight: bold; word-spacing: 5px;">00000000</div>
+                    </div>
                 </div>
-                <div class="decode-card">
-                    <h3>Computer Language (Binary)</h3>
-                    <div id="binaryOutput" style="font-family: monospace; margin-top: 15px; color: var(--primary); font-weight: bold;">
-                        00000000
+
+                <div class="translation-row" style="background: #e0f2fe; border-color: #bae6fd;">
+                    <div class="translation-box">
+                        <h3>Computer Language (Input)</h3>
+                        <textarea id="binaryInput" rows="3" placeholder="Paste binary here (e.g. 01001000 01101001)..." oninput="decodeBinary()"></textarea>
+                    </div>
+                    <div class="translation-box">
+                        <h3>Human Language (Output)</h3>
+                        <div id="humanOutput" style="color: #0369a1; font-weight: bold; font-size: 1.2rem; min-height: 30px;">Waiting for binary...</div>
                     </div>
                 </div>
             </div>
-            <p style="margin-top:20px;">Did you know? Capital 'A' is number 65 (01000001), but lowercase 'a' is 97 (01100001)!</p>
+
+            <div class="img-placeholder" id="ascii-chart">
+            </div>
+            <div>
+                <p><i>* The foremost number of an ASCII binary input is used for error-checking.<br>Add a 0 in front for the above conversion.</i> </p>
+            </div>
         </div>
 
         <div id="tab4" class="module">
-            <h2>Images: Grid of Numbers</h2>
-            <p>An image is just a grid of dots called <strong>Pixels</strong>. In a black-and-white image, 0 is white and 1 is black.</p>
-            <p><strong>Activity:</strong> Click the squares to draw a picture. Watch the binary code update instantly.</p>
+            <h2>Images: Colored Pixels (Hex)</h2>
+            <p>For black and white, we only needed 1 bit (0 or 1). For <strong>Color</strong>, we need a lot more data! We use <strong>Hex Codes</strong> to tell the computer exactly how much Red, Green, and Blue to mix.</p>
+            
+            <div class="pixel-toolbar">
+                <label><strong>Select Color:</strong></label>
+                <input type="color" id="pixelColor" value="#ff0000">
+                <span style="font-size: 0.9rem;">(Click pixels to paint)</span>
+                <button onclick="clearGrid()" style="padding: 5px 15px; cursor: pointer;">Clear Canvas</button>
+            </div>
 
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div class="pixel-grid" id="pixelGrid">
                     </div>
                 
                 <div class="pixel-code">
-                    <strong>Computer Memory:</strong><br>
-                    <span id="pixelBinary">00000000...</span>
+                    <strong style="color: #fbbf24;">Computer Memory (Hex Data):</strong><br>
+                    <span id="pixelBinary">#FFFFFF #FFFFFF...</span>
                 </div>
-                <button onclick="clearGrid()" style="margin-top: 10px; padding: 8px 16px; cursor: pointer;">Clear Grid</button>
             </div>
         </div>
     </div>
@@ -297,7 +418,6 @@
 
         // --- MODULE 2: THE BYTE ---
         const byteContainer = document.getElementById('byteContainer');
-        // Create 8 switches
         for (let i = 7; i >= 0; i--) {
             const val = Math.pow(2, i);
             const wrapper = document.createElement('div');
@@ -311,60 +431,119 @@
 
         function toggleByteBit(el) {
             el.classList.toggle('on');
-            calculateByte();
-        }
-
-        function calculateByte() {
             let total = 0;
             document.querySelectorAll('.byte-switch').forEach(sw => {
-                if (sw.classList.contains('on')) {
-                    total += parseInt(sw.getAttribute('data-val'));
-                }
+                if (sw.classList.contains('on')) total += parseInt(sw.getAttribute('data-val'));
             });
             document.getElementById('byteDecimal').innerText = total;
         }
 
-        // --- MODULE 3: TEXT ---
+        function runSimulation() {
+            const bar32 = document.getElementById('bar32');
+            const bar64 = document.getElementById('bar64');
+            const stat32 = document.getElementById('status32');
+            const stat64 = document.getElementById('status64');
+
+            // Reset
+            [bar32, bar64].forEach(b => { b.className = 'arch-fill'; b.style.width = '0%'; });
+            stat32.innerText = "Loading..."; stat64.innerText = "Loading...";
+
+            setTimeout(() => {
+                bar32.style.width = '50%'; 
+                setTimeout(() => { bar32.classList.add('crash'); stat32.innerText = "CRASH! Out of Memory."; stat32.style.color = "#ef4444"; }, 1000);
+
+                bar64.style.width = '100%';
+                setTimeout(() => { stat64.innerText = "Success! Game Running."; stat64.style.color = "#22c55e"; }, 1000);
+            }, 100);
+        }
+
+        // --- MODULE 3: TEXT (ASCII) ---
+        // 1. Text to Binary
         function encodeText() {
             const input = document.getElementById('humanInput').value;
             let output = "";
             for (let i = 0; i < input.length; i++) {
-                // Get ASCII code and convert to binary
                 let bin = input[i].charCodeAt(0).toString(2);
-                // Pad with leading zeros to make it 8 bits
                 while (bin.length < 8) bin = "0" + bin;
                 output += bin + " ";
             }
             document.getElementById('binaryOutput').innerText = output || "00000000";
         }
 
-        // --- MODULE 4: IMAGES ---
-        const pixelGrid = document.getElementById('pixelGrid');
-        const totalPixels = 64; // 8x8
+        // 2. Binary to Text
+        function decodeBinary() {
+            const input = document.getElementById('binaryInput').value;
+            // Clean up input: remove anything that isn't 0, 1, or space
+            const cleanInput = input.replace(/[^01 ]/g, '');
+            const bytes = cleanInput.split(/\s+/); // Split by space
+            let textOutput = "";
 
+            bytes.forEach(byte => {
+                if(byte.length === 8) { // Only process valid 8-bit chunks
+                    const charCode = parseInt(byte, 2);
+                    if(!isNaN(charCode)) textOutput += String.fromCharCode(charCode);
+                }
+            });
+
+            document.getElementById('humanOutput').innerText = textOutput || "...";
+        }
+
+        // --- MODULE 4: IMAGES (COLOR) ---
+        const pixelGrid = document.getElementById('pixelGrid');
+        const totalPixels = 64; 
+
+        // Initialize Grid
         for (let i = 0; i < totalPixels; i++) {
             const pix = document.createElement('div');
             pix.className = 'pixel';
+            pix.style.backgroundColor = '#000000'; // Default black
+            
+            // Add click event to paint
             pix.onclick = function() {
-                this.classList.toggle('black');
-                updatePixelBinary();
+                const color = document.getElementById('pixelColor').value;
+                this.style.backgroundColor = color;
+                updateHexData();
             };
             pixelGrid.appendChild(pix);
         }
 
-        function updatePixelBinary() {
-            let binaryString = "";
-            document.querySelectorAll('.pixel').forEach((p, index) => {
-                binaryString += p.classList.contains('black') ? "1" : "0";
-                if ((index + 1) % 8 === 0) binaryString += " "; // Space every row for readability
+        function updateHexData() {
+            let hexString = "";
+            const pixels = document.querySelectorAll('.pixel');
+            pixels.forEach((p, index) => {
+                // Convert RGB to Hex
+                const rgb = p.style.backgroundColor; // returns "rgb(r, g, b)"
+                const hex = rgbToHex(rgb);
+                hexString += hex.toUpperCase() + " ";
+                
+                // Add line break in code display every 8 pixels (row end)
+                if ((index + 1) % 8 === 0) hexString += "\n"; 
             });
-            document.getElementById('pixelBinary').innerText = binaryString;
+            document.getElementById('pixelBinary').innerText = hexString;
         }
 
         function clearGrid() {
-            document.querySelectorAll('.pixel').forEach(p => p.classList.remove('black'));
-            updatePixelBinary();
+            document.querySelectorAll('.pixel').forEach(p => p.style.backgroundColor = '#ffffff');
+            updateHexData();
         }
+
+        // Helper to convert rgb(x, y, z) to #hex
+        function rgbToHex(rgb) {
+            if (rgb.startsWith('#')) return rgb; // already hex
+            
+            // Extract numbers from rgb string
+            const rgbValues = rgb.match(/\d+/g);
+            if (!rgbValues) return "#FFFFFF";
+
+            return "#" + 
+                ((1 << 24) + (parseInt(rgbValues[0]) << 16) + 
+                (parseInt(rgbValues[1]) << 8) + 
+                parseInt(rgbValues[2])).toString(16).slice(1);
+        }
+        
+        // Initial run
+        updateHexData();
+
     </script>
 </body>
 </html>
