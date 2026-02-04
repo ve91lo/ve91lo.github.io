@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mac Mini M4 Organization Simulator</title>
+    <title>Modern Mini PC Simulator</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #1c1c1e; color: #f5f5f7; }
         
@@ -75,9 +75,9 @@
 
     <div id="ui-container">
         <div class="card">
-            <h1>Mac Mini M4 Explorer</h1>
-            <p>An educational look inside Apple's ultra-compact computer architecture.</p>
-            <span class="instruction">Left Click to Rotate | Scroll to Zoom | <b>Click parts to identify</b></span>
+            <h1>Modern Mini PC Simulator</h1>
+            <p>An educational look inside an ultra-compact computer architecture, based on Apple's Mac Mini M4.</p>
+            <span class="instruction">Left Click to Rotate<br>Scroll to Zoom<br><b>Click parts to identify</b></span>
         </div>
         
         <div class="card" id="info-panel" style="display: none; opacity: 0; transform: translateY(10px);">
@@ -101,42 +101,47 @@
         const componentData = {
             "Case": {
                 title: "Aluminum Unibody",
-                desc: "5x5 inches. It acts as the 'skeleton'. The entire case is made of recycled aluminum and actually helps dissipate heat!",
+                desc: "The size is very compact at 13cm x 13cm. It acts as the 'skeleton' of this mini desktop computer. The entire case is made of aluminum and actually helps with structure as well as dissipate heat!",
                 color: 0x888888
+            },
+            "Foot": {
+                title: "Rubberized Foot",
+                desc: "Not only the foot is rubberized to prevent slippage, the foot was also chamfered such that air can get inside the computer!",
+                color: 0xffffff
             },
             "SoC": {
                 title: "Apple M4 Chip (SoC)",
-                desc: "The 'Brain'. In traditional PCs, the CPU and GPU are separate. Here, the CPU, GPU, and Neural Engine are all fused into one silicon chip for extreme speed.",
-                color: 0x333333
+                desc: "In traditional PCs, the CPU and GPU (graphics processing unit) are separate. Here, the CPU, GPU, and other processing units are all fused into one silicon chip for minimal latency and maximum efficiency.",
+                color: 0x00f2de
             },
             "UnifiedMemory": {
                 title: "Unified Memory (RAM)",
-                desc: "Instead of separate RAM sticks, memory is soldered right next to the M4 chip. This allows the CPU and GPU to share data instantly without copying it.",
+                desc: "Instead of separate RAM sticks, memory is soldered right next to the SoC chip. This approach allows the CPU and GPU (graphics processing unit) to share data instantly without copying it.",
                 color: 0x2997ff
             },
             "Fan": {
                 title: "Blower Fan",
                 desc: "The 'Lungs'. It pulls cool air in from the bottom foot, pushes it through the heatsink, and vents it out the back. It's vital for such a small box.",
-                color: 0x111111
+                color: 0xdddddd
             },
             "Heatsink": {
                 title: "Radial Heatsink",
-                desc: "A spiral of metal fins that sits on top of the M4 chip. It absorbs heat from the chip so the fan can blow it away.",
+                desc: "A spiral of metal fins with heatpipes that sits on top of the SoC chip. It absorbs heat from the chip so the fan can blow it away.",
                 color: 0xb87333
             },
             "LogicBoard": {
                 title: "Logic Board",
-                desc: "The main circuit board. It's much smaller than a standard PC motherboard. It holds the M4, storage, and ports.",
-                color: 0x1e272e
+                desc: "The main circuit board. It's much smaller than a standard PC motherboard. It holds the SoC, storage, and data input/output ports.",
+                color: 0x115d33
             },
             "PSU": {
                 title: "Internal Power Supply",
                 desc: "Surprisingly, the power brick is INSIDE this tiny box! It converts wall power (AC) to safe DC power for the board.",
-                color: 0x222222
+                color: 0xfffc00
             },
             "Storage": {
                 title: "NAND Storage",
-                desc: "Long-term storage chips. In the M4, these are often on a removable daughterboard, unlike previous models where they were soldered on.",
+                desc: "Long-term storage chips. These are often on a removable daughterboard, while some models have them soldered on the logic board.",
                 color: 0x555555
             },
             "PowerButton": {
@@ -206,53 +211,92 @@
             return mesh;
         }
 
+        function createMacMiniStyleBox(width = 2, depth = 2, height = 0.4, radius = 0.12, curveSegments = 8) {
+            const shape = new THREE.Shape();
+            const hw = width / 2;
+            const hd = depth / 2;
+
+            // Rounded rectangle, centered at (0,0)
+            shape.moveTo(-hw + radius, -hd);
+            shape.lineTo( hw - radius, -hd);
+            shape.quadraticCurveTo( hw, -hd,  hw, -hd + radius);     // "bottom right"
+
+            shape.lineTo( hw,  hd - radius);
+            shape.quadraticCurveTo( hw,  hd,  hw - radius, hd);       // "top right"
+
+            shape.lineTo(-hw + radius,  hd);
+            shape.quadraticCurveTo(-hw,  hd, -hw, hd - radius);       // "top left"
+
+            shape.lineTo(-hw, -hd + radius);
+            shape.quadraticCurveTo(-hw, -hd, -hw + radius, -hd);      // "bottom left"
+
+            const extrudeSettings = {
+                depth: height,          // how tall the object will be after rotation
+                bevelEnabled: false,
+                steps: 1,
+                curveSegments: curveSegments
+            };
+
+            let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+            // Rotate 90° around X-axis so extrusion direction becomes +Y
+            geometry.rotateX(Math.PI / 2);
+
+            // Optional: center origin after rotation
+            geometry.center();
+
+            geometry.computeVertexNormals();
+
+            return geometry;
+        }
+
         // --- Build the Mac Mini M4 ---
         const macGroup = new THREE.Group();
         scene.add(macGroup);
 
         // 1. Bottom Foot (Air Intake)
-        const footGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.1, 64);
-        const foot = createPart("Case", footGeo, { color: 0x111111, roughness: 0.9 }, {x:0, y:-0.55, z:0}, macGroup, {x:0, y:-1.5, z:0});
+        const footGeo = new THREE.CylinderGeometry(2, 1.6, 0.4, 64);
+        const foot = createPart("Foot", footGeo, { color: 0x111111, roughness: 0.9 }, {x:0, y:-0.2, z:0}, macGroup, {x:0, y:-1.5, z:0});
 
         // 1.5 The Power Button (On the bottom!)
-        const btnGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.05);
-        const pwrBtn = createPart("PowerButton", btnGeo, { color: 0xffffff, emissive: 0x333333 }, {x:1.5, y:-0.55, z:1.5}, macGroup, {x:0, y:-1.6, z:0});
+        const btnGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.08, 64);
+        const pwrBtn = createPart("PowerButton", btnGeo, { color: 0xffffff, emissive: 0x333333 }, {x:1.5, y:-0.18, z:1.5}, macGroup, {x:0, y:-1.6, z:0});
         // Attach to case visually, but logic-wise separate
         pwrBtn.rotation.x = Math.PI; 
 
         // 2. Logic Board (The base)
-        const boardGeo = new RoundedBoxGeometry(3.8, 0.05, 3.8, 4, 0.1);
-        const logicBoard = createPart("LogicBoard", boardGeo, { color: 0x2f3640 }, {x:0, y:-0.4, z:0}, macGroup, {x:0, y:-0.8, z:0});
+        const boardGeo = new RoundedBoxGeometry(3.5, 0.05, 3.5, 4,);
+        const logicBoard = createPart("LogicBoard", boardGeo, { color: 0x2f3640 }, {x:0, y:-0.1, z:0}, macGroup, {x:0, y:0.8, z:0});
 
         // 3. The M4 SoC (Central Chip)
         const m4Geo = new THREE.BoxGeometry(0.8, 0.02, 0.8);
-        const m4Chip = createPart("SoC", m4Geo, { color: 0xe0e0e0, metalness: 0.8, roughness: 0.2 }, {x:0, y:0.04, z:0}, logicBoard, {x:0, y:0, z:0});
+        const m4Chip = createPart("SoC", m4Geo, { color: 0xe0e0e0, metalness: 0.8, roughness: 0.2 }, {x:0, y:0.04, z:0}, logicBoard, {x:0, y:0.1, z:0});
         
         // 3.1 Unified Memory (Two small rectangles ON the SoC package)
         const ramGeo = new THREE.BoxGeometry(0.2, 0.03, 0.5);
-        const ram1 = createPart("UnifiedMemory", ramGeo, { color: 0x333333 }, {x:-0.5, y:0.04, z:0}, logicBoard, {x:0, y:0, z:0});
-        const ram2 = createPart("UnifiedMemory", ramGeo, { color: 0x333333 }, {x:0.5, y:0.04, z:0}, logicBoard, {x:0, y:0, z:0});
+        const ram1 = createPart("UnifiedMemory", ramGeo, { color: 0x333333 }, {x:-0.5, y:0.04, z:0}, logicBoard, {x:0, y:0.15, z:0});
+        const ram2 = createPart("UnifiedMemory", ramGeo, { color: 0x333333 }, {x:0.5, y:0.04, z:0}, logicBoard, {x:0, y:0.2, z:0});
 
         // 3.2 Storage (NAND Module - Removable on M4)
         const ssdGeo = new THREE.BoxGeometry(0.6, 0.05, 1.2);
-        const ssd = createPart("Storage", ssdGeo, { color: 0x111111 }, {x:1.2, y:0.1, z:-0.8}, logicBoard, {x:0.5, y:0.2, z:0});
+        const ssd = createPart("Storage", ssdGeo, { color: 0x111111 }, {x:1.2, y:0.04, z:-0.8}, logicBoard, {x:0.5, y:0.2, z:0});
 
         // 4. Heatsink (Radial/Spiral fins)
         const sinkGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.3, 32);
-        const heatsink = createPart("Heatsink", sinkGeo, { color: 0xb87333 }, {x:0, y:-0.1, z:0}, macGroup, {x:0, y:0.2, z:0});
+        const heatsink = createPart("Heatsink", sinkGeo, { color: 0xb87333 }, {x:0, y:-0.02, z:0}, m4Chip, {x:0, y:1.4, z:0});
 
         // 5. Blower Fan
         const fanGeo = new THREE.CylinderGeometry(1.5, 1.5, 0.2, 32);
-        const fan = createPart("Fan", fanGeo, { color: 0x111111 }, {x:0, y:0.2, z:0}, macGroup, {x:0, y:0.8, z:0});
+        const fan = createPart("Fan", fanGeo, { color: 0x111111 }, {x:0, y:0.3, z:0}, heatsink, {x:0, y:0.4, z:0});
         
         // 6. Power Supply (Internal Board)
         const psuGeo = new THREE.BoxGeometry(3.5, 0.3, 1.0);
-        const psu = createPart("PSU", psuGeo, { color: 0x222222 }, {x:0, y:0.4, z:-1.2}, macGroup, {x:0, y:1.4, z:-0.5});
+        const psu = createPart("PSU", psuGeo, { color: 0x222222 }, {x:0, y:0.4, z:-1.2}, logicBoard, {x:0, y:0.4, z:-0.5});
 
         // 7. The Case (Shell)
-        const caseGeo = new RoundedBoxGeometry(4.2, 1.4, 4.2, 4, 0.2);
+        const caseGeo = new createMacMiniStyleBox(4, 4, 1.4, 0.8, 64);
         // We make the case slightly transparent or open bottom so we can see inside during explode
-        const caseMesh = createPart("Case", caseGeo, { color: 0xc0c0c0, metalness: 0.6, roughness: 0.3 }, {x:0, y:0.5, z:0}, macGroup, {x:0, y:2.5, z:0});
+        const caseMesh = createPart("Case", caseGeo, { color: 0xc0c0c0, metalness: 0.6, roughness: 0.3 }, {x:0, y:0.5, z:0}, macGroup, {x:0, y:3.5, z:0});
         
         // Add Apple Logo to top
         const logoGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.01, 32);
@@ -335,3 +379,4 @@
     </script>
 </body>
 </html>
+
