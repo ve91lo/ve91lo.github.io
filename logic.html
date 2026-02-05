@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Gates & Components</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #334155;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --on-color: #22c55e;
+            --off-color: #ef4444;
+            --wire-off: #cbd5e1;
+            --wire-on: #22c55e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--secondary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: var(--primary); margin-bottom: 5px; }
+        h3 { border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin-top: 30px;}
+        p { line-height: 1.6; max-width: 900px; }
+
+        .container { max-width: 1200px; width: 100%; }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            padding: 5px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--secondary);
+            border-radius: 6px;
+            transition: 0.3s;
+            min-width: 120px;
+        }
+        .tab-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* MODULES */
+        .module { display: none; background: var(--card-bg); padding: 30px; border-radius: 12px; animation: fadeIn 0.3s; }
+        .module.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* GATES GRID */
+        .gate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .gate-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8fafc;
+            position: relative;
+        }
+        
+        /* SEMANTICS IMAGE PLACEHOLDER */
+        .semantics-img {
+            width: 100%;
+            height: 120px;
+            background: #e2e8f0;
+            border: 2px dashed #94a3b8;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: #64748b;
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* SVG */
+        svg { width: 220px; height: 120px; overflow: visible; user-select: none; }
+        .wire { stroke: var(--wire-off); stroke-width: 4; fill: none; transition: 0.2s; pointer-events: none; } 
+        .wire.on { stroke: var(--wire-on); }
+        
+        .input-node { 
+            cursor: pointer; fill: var(--off-color); stroke: #333; stroke-width: 1; 
+            transition: 0.2s; pointer-events: all; 
+        }
+        .input-node.on { fill: var(--on-color); }
+        .input-node:hover { stroke: #000; stroke-width: 3; }
+        
+        .gate-body { fill: #fff; stroke: #334155; stroke-width: 2; pointer-events: none;}
+        .output-node { fill: var(--off-color); transition: 0.3s; pointer-events: none;}
+        .output-node.on { fill: var(--on-color); box-shadow: 0 0 10px var(--on-color); }
+
+        /* COMPONENT BLACK BOX STYLES */
+        .component-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .black-box {
+            width: 220px;
+            background: #1e293b;
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .bb-title { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+        .bb-io {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .pin {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444; border: 2px solid #fff;
+            cursor: pointer;
+        }
+        .pin.on { background: #22c55e; box-shadow: 0 0 8px #22c55e;}
+        .pin-label { font-size: 0.8rem; color: #cbd5e1; }
+        .clk-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: #f59e0b;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+        }
+        .clk-btn:active { transform: scale(0.95); }
+
+        /* MUX / DEMUX Styles */
+        .mux-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .bit-array { display: flex; flex-direction: column; gap: 5px; }
+        .bit-cell {
+            width: 30px; height: 30px;
+            border: 1px solid #94a3b8;
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; cursor: pointer;
+        }
+        .bit-cell.active { background: #22c55e; color: white; border-color: #166534; }
+        
+        /* COUNTER */
+        .counter-controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .flip-flop {
+            width: 70px; height: 90px;
+            background: white; border: 2px solid #333;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 4px;
+        }
+        .led {
+            width: 25px; height: 25px; border-radius: 50%;
+            background: #ccc; margin-bottom: 10px;
+            border: 2px solid #666; transition: 0.1s;
+        }
+        .led.on { background: #22c55e; box-shadow: 0 0 15px #22c55e; border-color: #14532d; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Building blocks of computer's 'brain'</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tab1')">1. Basic Gates</button>
+        <button class="tab-btn" onclick="switchTab('tab2')">2. Universal & Special</button>
+        <button class="tab-btn" onclick="switchTab('tab3')">3. Advanced Components</button>
+        <button class="tab-btn" onclick="switchTab('tab4')">4. 4-Bit Ripple Counter</button>
+    </div>
+
+    <div id="tab1" class="module active">
+        <h2>Basic Logic Gates</h2>
+        <p>What differed a computer with a lot of light switches are logic gates, which <strong>operates on signals</strong> instead of manual actuation.<br>Here are some examples of logic gates.</p>
+        <div class="gate-grid">
+            <div class="gate-card">
+                <div class="gate-title"><strong>NOT Gate</strong></div>
+                <p>Metaphor: If he's coming, I'm NOT coming.</p>
+                <svg id="svg-not">
+                    <path id="w-not-out" class="wire" d="M 130 50 L 190 50" />
+                    <path id="w-not-1" class="wire" d="M 10 50 L 70 50" />
+                    <path class="gate-body" d="M 70 20 L 120 50 L 70 80 Z" />
+                    <circle class="gate-body" cx="125" cy="50" r="5" />
+                    <circle cx="10" cy="50" r="10" class="input-node" onclick="toggleGateInput('not', 0)" />
+                    <circle id="out-not" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+
+            <div class="gate-card">
+                <div class="gate-title"><strong>AND Gate</strong></div>
+                <p>Metaphor: Let's play games AND eat snacks.</p>
+                <svg id="svg-and">
+                    <path id="w-and-out" class="wire" d="M 140 50 L 190 50" />
+                    <path id="w-and-1" class="wire" d="M 10 30 L 60 30" />
+                    <path id="w-and-2" class="wire" d="M 10 70 L 60 70" />
+                    <path class="gate-body" d="M 60 10 L 100 10 C 130 10 130 90 100 90 L 60 90 Z" />
+                    <circle cx="10" cy="30" r="10" class="input-node" onclick="toggleGateInput('and', 0)" />
+                    <circle cx="10" cy="70" r="10" class="input-node" onclick="toggleGateInput('and', 1)" />
+                    <circle id="out-and" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+
+            <div class="gate-card">
+                <div class="gate-title"><strong>OR Gate</strong></div>
+                <p>Metaphor: We can swim OR sunbathe.</p>
+                <svg id="svg-or">
+                    <path id="w-or-out" class="wire" d="M 140 50 L 190 50" />
+                    <path id="w-or-1" class="wire" d="M 10 30 L 65 30" />
+                    <path id="w-or-2" class="wire" d="M 10 70 L 65 70" />
+                    <path class="gate-body" d="M 55 10 C 70 10 90 30 140 50 C 90 70 70 90 55 90 C 70 70 70 30 55 10 Z" />
+                    <circle cx="10" cy="30" r="10" class="input-node" onclick="toggleGateInput('or', 0)" />
+                    <circle cx="10" cy="70" r="10" class="input-node" onclick="toggleGateInput('or', 1)" />
+                    <circle id="out-or" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab2" class="module">
+        <h2>Universal Gates</h2>
+        <p>Aside from the basics, there are also additional variants of logic gates to build more capable circuits.<br>Here are some more examples of logic gates.</p>
+        <div class="gate-grid">
+            <div class="gate-card">
+                <div class="gate-title"><strong>NAND Gate</strong></div>
+                <p>Metaphor: You can't swim and eat.</p>
+                <svg id="svg-nand">
+                    <path id="w-nand-out" class="wire" d="M 145 50 L 190 50" />
+                    <path id="w-nand-1" class="wire" d="M 10 30 L 60 30" />
+                    <path id="w-nand-2" class="wire" d="M 10 70 L 60 70" />
+                    <path class="gate-body" d="M 60 10 L 100 10 C 130 10 130 90 100 90 L 60 90 Z" />
+                    <circle class="gate-body" cx="138" cy="50" r="5" />
+                    <circle cx="10" cy="30" r="10" class="input-node" onclick="toggleGateInput('nand', 0)" />
+                    <circle cx="10" cy="70" r="10" class="input-node" onclick="toggleGateInput('nand', 1)" />
+                    <circle id="out-nand" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+            
+            <div class="gate-card">
+                <div class="gate-title"><strong>NOR Gate</strong></div>
+                <p>Metaphor: Neither of us would not go alone.</p>
+                <svg id="svg-nor">
+                    <path id="w-nor-out" class="wire" d="M 148 50 L 190 50" />
+                    <path id="w-nor-1" class="wire" d="M 10 30 L 65 30" />
+                    <path id="w-nor-2" class="wire" d="M 10 70 L 65 70" />
+                    <path class="gate-body" d="M 55 10 C 70 10 90 30 140 50 C 90 70 70 90 55 90 C 70 70 70 30 55 10 Z" />
+                    <circle class="gate-body" cx="145" cy="50" r="5" />
+                    <circle cx="10" cy="30" r="10" class="input-node" onclick="toggleGateInput('nor', 0)" />
+                    <circle cx="10" cy="70" r="10" class="input-node" onclick="toggleGateInput('nor', 1)" />
+                    <circle id="out-nor" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+
+            <div class="gate-card">
+                <div class="gate-title"><strong>XOR Gate</strong></div>
+                <p>Metaphor: You must choose either her or me.</p>
+                <svg id="svg-xor">
+                    <path id="w-xor-out" class="wire" d="M 140 50 L 190 50" />
+                    <path id="w-xor-1" class="wire" d="M 10 30 L 65 30" />
+                    <path id="w-xor-2" class="wire" d="M 10 70 L 65 70" />
+                    <path class="gate-body" fill="none" d="M 45 10 C 60 10 60 90 45 90" />
+                    <path class="gate-body" d="M 55 10 C 70 10 90 30 140 50 C 90 70 70 90 55 90 C 70 70 70 30 55 10 Z" />
+                    
+                    <circle cx="10" cy="30" r="10" class="input-node" onclick="toggleGateInput('xor', 0)" />
+                    <circle cx="10" cy="70" r="10" class="input-node" onclick="toggleGateInput('xor', 1)" />
+                    <circle id="out-xor" cx="190" cy="50" r="10" class="output-node" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab3" class="module">
+        <h2>Latches & Flip-Flops</h2>
+        <p>A computer must have the ability to hold data in order to perform calculations.<br>This is facilitated by using combinations of logic gates that <strong>write, hold and release data at conditions</strong>, of which are categorized as latches and flip-flops.</p>
+        <h3>Latches</h3>
+        <p>Latches are level-sensitive. <strong>it can be activated as long as the clock is active</strong>, no matter if the clock's position is high or low.<br>These components are used to build <strong>asynchronous registers and SRAM (Static RAM) in processors</strong>, storing small chunks of data that needed instant access.</p>
+        <div class="component-row">
+            <div class="black-box">
+                <div class="semantics-img" style="height: 80px; width: 100%; margin:0 0 10px 0; background-image:url(https://sub.allaboutcircuits.com/images/04173.png); background-size: cover; background-position: center;  border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">SR Latch</div>
+                <p>The basic form of latches:<br>S writes the state of the latch, while R resets the state.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="sr-s" onclick="toggleComp('sr_latch', 'S')"></div><span class="pin-label">S</span></div>
+                    <div><div class="pin" id="sr-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <div class="bb-io">
+                    <div><div class="pin" id="sr-r" onclick="toggleComp('sr_latch', 'R')"></div><span class="pin-label">R</span></div>
+                </div>
+            </div>
+
+            <div class="black-box">
+                <div class="semantics-img" style="height: 70px; width: 100%; margin:0 0 10px 0; background-image:url(https://www.allaboutcircuits.com/uploads/articles/internal-logic-d-latch.jpg); background-size: cover; background-position: center;  border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">D Latch</div>
+                <p>The latch state only changes when the signal from the enable pin(E) is high, making it more stable than SR latch.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="dl-d" onclick="toggleComp('d_latch', 'D')"></div><span class="pin-label">D</span></div>
+                    <div><div class="pin" id="dl-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <div class="bb-io">
+                    <div><div class="pin" id="dl-e" onclick="toggleComp('d_latch', 'E')"></div><span class="pin-label">E</span></div>
+                </div>
+            </div>
+
+             <div class="black-box">
+                <div class="semantics-img" style="height: 200px; width: 100%; margin:0 0 10px 0; background-image:url(https://img.brainkart.com/imagebk7/vbqZ9W3.jpg); background-size: cover; background-position: center; border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">T Latch</div>
+                <p>Works similarly to D latch, but the state only changes when T is high instead of being directly toggled.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="tl-t" onclick="toggleComp('t_latch', 'T')"></div><span class="pin-label">T</span></div>
+                    <div><div class="pin" id="tl-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <div class="bb-io">
+                    <div><div class="pin" id="tl-e" onclick="toggleComp('t_latch', 'E')"></div><span class="pin-label">E</span></div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Flip-Flops (Edge Triggered)</h3>
+        <p>Flip-Flops are edge-sensitive. <strong>It would only be activated once the clock states have changed</strong>, like how a water gun would only shoot once even if someone hold down the trigger.<br>These components are used to <strong>build synchronous registers, like program counters and control units</strong>. These are parts that directly impacts the logic performance in a processor.</p>
+        <div class="component-row">
+            <div class="black-box">
+                <div class="semantics-img" style="height: 70px; width: 100%; margin:0 0 10px 0; background-image:url(https://tams-www.informatik.uni-hamburg.de/applets/hades/webdemos/16-flipflops/10-srff/clocked-srff.gif); background-size: cover; background-position: center; border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">S-R Flip-Flop</div>
+                <p>An SR Latch that can only be activated once CLK is changed.<br><strong>Sending S and R a high signal while the CLK is changing would create an invalid state.</strong></p>
+                <div class="bb-io">
+                    <div><div class="pin" id="srf-s" onclick="toggleComp('sr_ff', 'S')"></div><span class="pin-label">S</span></div>
+                    <div><div class="pin" id="srf-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <div class="bb-io">
+                    <div><div class="pin" id="srf-r" onclick="toggleComp('sr_ff', 'R')"></div><span class="pin-label">R</span></div>
+                </div>
+                <button class="clk-btn" onclick="clockPulse('sr_ff')">CLK</button>
+            </div>
+
+            <div class="black-box">
+                <div class="semantics-img" style="height: 80px; width: 100%; margin:0 0 10px 0; background-image:url(https://www.allaboutcircuits.com/uploads/articles/J-K-flip-flop-diagram.jpg); background-size: cover; background-position: center; border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">J-K Flip-Flop</div>
+                <p>A debugged S-R Flip-Flop.<br>Sending J and K a high signal while CLK is changing would toggle the Flip-Flop's state.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="jk-j" onclick="toggleComp('jk_ff', 'J')"></div><span class="pin-label">J</span></div>
+                    <div><div class="pin" id="jk-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <div class="bb-io">
+                    <div><div class="pin" id="jk-k" onclick="toggleComp('jk_ff', 'K')"></div><span class="pin-label">K</span></div>
+                </div>
+                <button class="clk-btn" onclick="clockPulse('jk_ff')">CLK</button>
+            </div>
+
+
+             <div class="black-box">
+                <div class="semantics-img" style="height: 80px; width: 100%; margin:0 0 10px 0; background-image:url(https://media.geeksforgeeks.org/wp-content/uploads/20240327133742/image-476.webp); background-size: cover; background-position: center; border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">D Flip-Flop</div>
+                <p>D can only toggle the state once CLK is changing.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="df-d" onclick="toggleComp('d_ff', 'D')"></div><span class="pin-label">D</span></div>
+                    <div><div class="pin" id="df-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <button class="clk-btn" onclick="clockPulse('d_ff')">CLK</button>
+            </div>
+
+            <div class="black-box">
+                <div class="semantics-img" style="height: 70px; width: 100%; margin:0 0 10px 0; background-image:url(https://www.circuits-diy.com/wp-content/uploads/2020/02/T-Flip-Flop-Circuit-using-74HC74-Truth-Table.png); background-size: cover; background-position: center; border: 1px dashed #64748b; color: #cbd5e1;"></div>
+                <div class="bb-title">T Flip-Flop</div>
+                <p>T can only change the state once CLK is changing.</p>
+                <div class="bb-io">
+                    <div><div class="pin" id="tf-t" onclick="toggleComp('t_ff', 'T')"></div><span class="pin-label">T</span></div>
+                    <div><div class="pin" id="tf-q" style="cursor:default"></div><span class="pin-label">Q</span></div>
+                </div>
+                <button class="clk-btn" onclick="clockPulse('t_ff')">CLK</button>
+            </div>
+        </div>
+
+        <h3>8-Bit Multiplexing</h3>
+        <p>As mentioned in 'Dissecting a computer' previously, processors like the CPU would either process the data by itself or send it elsewhere depending on the tasks.<br>This action must be facilitated by various datapaths, and it is vital for a processor to <strong>dictate which path the data would be going.</strong></p>
+        <p>Hence, multiplexers are created to <strong>route data</strong> between many sources and destinations, and demultiplexers are created to <strong>decode signals</strong>.</p>
+        
+        <div class="semantics-img" style="height: 720px; margin-top:10px; background-image:url(https://i.postimg.cc/QCZPZ07S/New-Project.png); background-size: cover; background-position: center;"></div>
+
+        <div class="mux-container">
+            <div>
+                <h4>8-to-1 Multiplexer</h4>
+                <div style="display:flex; gap: 10px;">
+                    <div class="bit-array" id="mux-inputs">
+                        </div>
+                    <div class="black-box" style="width: 100px; justify-content:center;">
+                        MUX
+                        <div style="margin-top:10px; font-size:0.8rem; color:#aaa;">Sel: <span id="mux-sel-val">0</span></div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div class="led" id="mux-out"></div>
+                        <small>Output</small>
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <label>Selector (0-7): <input type="number" min="0" max="7" value="0" id="mux-selector" onchange="updateMux()"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mux-container">
+            <div>
+                <h4>1-to-8 Demultiplexer</h4>
+                <div style="display:flex; gap: 10px;">
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div class="pin" id="demux-in" onclick="toggleDemuxIn()"></div>
+                        <small>Input</small>
+                    </div>
+                    <div class="black-box" style="width: 100px; justify-content:center;">
+                        DEMUX
+                        <div style="margin-top:10px; font-size:0.8rem; color:#aaa;">Sel: <span id="demux-sel-val">0</span></div>
+                    </div>
+                    <div class="bit-array" id="demux-outputs">
+                        </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <label>Selector (0-7): <input type="number" min="0" max="7" value="0" id="demux-selector" onchange="updateDemux()"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab4" class="module">
+        <h2>4-Bit Ripple Counter</h2>
+        <p>With intricate combinations of flip-flops, latches, multiplexers and other components, engineers can assemble extremely capable integrated circuits such as CPUs, graphics cards and even AI chips.<br>We are going to look into combinations that are more simple yet just as useful.</p>
+        <p>Ripple counters are used to divide clock frequencies, track event sequences and more in a circuit. We would implement a 4-bit counter using 4 J-K flip flops and a clock.</p>
+        <div class="semantics-img" style="height: 500px; margin-top:10px; background-image:url(https://ecstudiosystems.com/discover/textbooks/basic-electronics/counters/images/asynchronous-counter.jpg); background-size: cover; background-position: center;"></div>
+        
+        <div class="counter-controls" style="justify-content:center;">
+            <div class="flip-flop"><div class="led" id="bit-8"></div><small>8</small></div>
+            <div class="flip-flop"><div class="led" id="bit-4"></div><small>4</small></div>
+            <div class="flip-flop"><div class="led" id="bit-2"></div><small>2</small></div>
+            <div class="flip-flop"><div class="led" id="bit-1"></div><small>1</small></div>
+        </div>
+
+        <div style="text-align:center; font-size: 2rem; margin: 20px; font-family:monospace; color: var(--primary);">
+            Total: <span id="counter-val">0</span>
+        </div>
+
+        <div class="counter-controls" style="background:#e2e8f0;">
+            <button class="clk-btn" onclick="manualPulse()" style="font-size:1.1rem; padding:10px 20px;">Manual Pulse</button>
+            <button class="clk-btn" onclick="resetCounter()" style="background:#ef4444; color:white;">RESET</button>
+            
+            <div style="border-left: 2px solid #ccc; padding-left: 20px; display:flex; align-items:center; gap:10px;">
+                <strong>Auto Clock:</strong>
+                <button id="auto-btn" class="clk-btn" onclick="toggleAuto()" style="background:#3b82f6; color:white;">START</button>
+                <input type="range" min="0" max="15" step="1" value="0" id="clock-speed">
+                <span id="speed-lbl" style="font-size:0.8rem;">1 Hz</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- NAVIGATION ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // --- PART 1 & 2: GATES ---
+    // Added 'xor' to state
+    const gateInputs = { not: [0], and: [0,0], or: [0,0], nand: [0,0], nor: [0,0], xor: [0,0] };
+
+    function toggleGateInput(gate, index) {
+        gateInputs[gate][index] = gateInputs[gate][index] ? 0 : 1;
+        updateGateVisuals(gate);
+    }
+
+    function updateGateVisuals(gate) {
+        const vals = gateInputs[gate];
+        let out = 0;
+        
+        // Logic
+        if(gate === 'not') out = !vals[0];
+        if(gate === 'and') out = vals[0] && vals[1];
+        if(gate === 'or') out = vals[0] || vals[1];
+        if(gate === 'nand') out = !(vals[0] && vals[1]);
+        if(gate === 'nor') out = !(vals[0] || vals[1]);
+        if(gate === 'xor') out = (vals[0] !== vals[1]); // XOR Logic
+
+        // DOM Updates
+        vals.forEach((v, i) => {
+            const wire = document.getElementById(`w-${gate}-${i+1}`);
+            // Select all inputs for this gate
+            const nodes = document.querySelectorAll(`#svg-${gate} .input-node`);
+            if(nodes[i]) {
+                if(v) nodes[i].classList.add('on'); else nodes[i].classList.remove('on');
+            }
+            if(wire) {
+                if(v) wire.classList.add('on'); else wire.classList.remove('on');
+            }
+        });
+
+        // Update Output
+        const outNode = document.getElementById(`out-${gate}`);
+        const outWire = document.getElementById(`w-${gate}-out`);
+        if(out) {
+            outNode.classList.add('on');
+            if(outWire) outWire.classList.add('on');
+        } else {
+            outNode.classList.remove('on');
+            if(outWire) outWire.classList.remove('on');
+        }
+    }
+    
+    // Init Gates
+    updateGateVisuals('not'); updateGateVisuals('nand'); updateGateVisuals('nor');
+
+
+    // --- PART 3: COMPONENTS STATE ---
+    const compState = {
+        sr_latch: { s:0, r:0, q:0 },
+        d_latch: { d:0, e:0, q:0 },
+        t_latch: { t:0, e:0, q:0 }, 
+        jk_ff: { j:0, k:0, q:0 },
+        sr_ff: { s:0, r:0, q:0 },
+        d_ff: { d:0, q:0 },
+        t_ff: { t:0, q:0 }
+    };
+
+    function toggleComp(id, pin) {
+        const key = pin.toLowerCase();
+        compState[id][key] = compState[id][key] ? 0 : 1;
+        
+        // Map ID to HTML ID
+        let domId = "";
+        if(id==='sr_latch') domId = `sr-${key}`;
+        if(id==='d_latch') domId = `dl-${key}`;
+        if(id==='t_latch') domId = `tl-${key}`;
+        if(id==='jk_ff') domId = `jk-${key}`;
+        if(id==='sr_ff') domId = `srf-${key}`;
+        if(id==='d_ff') domId = `df-${key}`;
+        if(id==='t_ff') domId = `tf-${key}`;
+
+        if(compState[id][key]) document.getElementById(domId).classList.add('on');
+        else document.getElementById(domId).classList.remove('on');
+
+        // LATCH LOGIC (Immediate Update)
+        if(id.includes('latch')) updateLatch(id);
+    }
+
+    function updateLatch(id) {
+        const s = compState[id];
+        let q = s.q; 
+
+        if(id === 'sr_latch') {
+            if(s.s && !s.r) q = 1;
+            else if(!s.s && s.r) q = 0;
+        }
+        if(id === 'd_latch') {
+            if(s.e) q = s.d;
+        }
+        if (id === 't_latch') {
+            if (s.e && s.t) q = s.q ? 0 : 1; 
+        }
+
+        s.q = q;
+        updateQ(id, q);
+    }
+
+    function clockPulse(id) {
+        const s = compState[id];
+        let q = s.q;
+
+        if(id === 'jk_ff') {
+            if(s.j && !s.k) q = 1;
+            else if(!s.j && s.k) q = 0;
+            else if(s.j && s.k) q = !q; 
+        }
+        if(id === 'sr_ff') {
+            if(s.s && !s.r) q = 1;
+            else if(!s.s && s.r) q = 0;
+        }
+        if(id === 'd_ff') {
+            q = s.d;
+        }
+        if(id === 't_ff') {
+            if(s.t) q = !q;
+        }
+
+        s.q = q ? 1 : 0; 
+        updateQ(id, s.q);
+    }
+
+    function updateQ(id, val) {
+        let domId = "";
+        if(id==='sr_latch') domId = `sr-q`;
+        if(id==='d_latch') domId = `dl-q`;
+        if(id==='t_latch') domId = `tl-q`;
+        if(id==='jk_ff') domId = `jk-q`;
+        if(id==='sr_ff') domId = `srf-q`;
+        if(id==='d_ff') domId = `df-q`;
+        if(id==='t_ff') domId = `tf-q`;
+
+        if(val) document.getElementById(domId).classList.add('on');
+        else document.getElementById(domId).classList.remove('on');
+    }
+
+    // --- MUX / DEMUX LOGIC ---
+    // Init Mux Grid
+    const muxInputs = document.getElementById('mux-inputs');
+    for(let i=0; i<8; i++) {
+        muxInputs.innerHTML += `<div class="bit-cell" id="mux-in-${i}" onclick="toggleMuxBit(${i})">${i}</div>`;
+    }
+    // Init Demux Grid
+    const demuxOutputs = document.getElementById('demux-outputs');
+    for(let i=0; i<8; i++) {
+        demuxOutputs.innerHTML += `<div class="bit-cell" id="demux-out-${i}">${i}</div>`;
+    }
+
+    function toggleMuxBit(i) {
+        const el = document.getElementById(`mux-in-${i}`);
+        el.classList.toggle('active');
+        updateMux();
+    }
+    function updateMux() {
+        const sel = document.getElementById('mux-selector').value;
+        document.getElementById('mux-sel-val').innerText = sel;
+        
+        const selectedInput = document.getElementById(`mux-in-${sel}`);
+        const isOn = selectedInput.classList.contains('active');
+        
+        const out = document.getElementById('mux-out');
+        if(isOn) out.classList.add('on'); else out.classList.remove('on');
+    }
+
+    let demuxInState = 0;
+    function toggleDemuxIn() {
+        demuxInState = !demuxInState;
+        const el = document.getElementById('demux-in');
+        if(demuxInState) el.classList.add('on'); else el.classList.remove('on');
+        updateDemux();
+    }
+    function updateDemux() {
+        const sel = document.getElementById('demux-selector').value;
+        document.getElementById('demux-sel-val').innerText = sel;
+        
+        // Clear all outs
+        for(let i=0; i<8; i++) document.getElementById(`demux-out-${i}`).classList.remove('active');
+        
+        // Set selected out logic
+        if(demuxInState) {
+            document.getElementById(`demux-out-${sel}`).classList.add('active');
+        }
+    }
+
+    // --- PART 4: RIPPLE COUNTER ---
+    let counterVal = 0;
+    let autoInterval = null;
+
+    function manualPulse() {
+        incrementCounter();
+    }
+    function resetCounter() {
+        counterVal = 0;
+        updateCounterVisuals();
+    }
+    function incrementCounter() {
+        counterVal++;
+        if(counterVal > 15) counterVal = 0; 
+        updateCounterVisuals();
+    }
+    function updateCounterVisuals() {
+        document.getElementById('counter-val').innerText = counterVal;
+        
+        toggleLed('bit-1', counterVal & 1);
+        toggleLed('bit-2', counterVal & 2);
+        toggleLed('bit-4', counterVal & 4);
+        toggleLed('bit-8', counterVal & 8);
+    }
+    function toggleLed(id, state) {
+        const el = document.getElementById(id);
+        if(state) el.classList.add('on'); else el.classList.remove('on');
+    }
+
+    function toggleAuto() {
+        const btn = document.getElementById('auto-btn');
+        if(autoInterval) {
+            clearInterval(autoInterval);
+            autoInterval = null;
+            btn.innerText = "START";
+            btn.style.background = "#3b82f6";
+        } else {
+            const val = document.getElementById('clock-speed').value;
+            const hz = Math.pow(2, val);
+            const speed = 1000 / hz;
+            autoInterval = setInterval(incrementCounter, speed);
+            btn.innerText = "STOP";
+            btn.style.background = "#ef4444";
+        }
+    }
+    
+    document.getElementById('clock-speed').oninput = function() {
+        const hz = Math.pow(2, this.value);
+        document.getElementById('speed-lbl').innerText = hz.toLocaleString() + " Hz";
+
+        if(autoInterval) {
+            clearInterval(autoInterval);
+            const speed = 1000 / hz; 
+            autoInterval = setInterval(incrementCounter, speed);
+        }
+    };
+
+</script>
+</body>
+</html>
